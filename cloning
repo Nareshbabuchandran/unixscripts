@@ -1,0 +1,48 @@
+#!/bin/sh
+echo -n "Enter the repo name:"
+read repo_name
+url=https://github.com/"$repo_name"?tab=repositories
+sub=https://github.com/"$repo_name"
+value=`curl -I $url | awk '/HTTP/ {print $2}'`
+echo $value;
+if [ $value = "200" ]
+then
+        curl $url > input
+        cat input | awk -F "[\"\/]" '/codeRepository/ {print $4}'> final
+if [  -d $repo_name ]
+then
+sudo rm -r $repo_name
+mkdir $repo_name
+        while read p; do
+        if [ ! -d $p ]
+        then
+                echo "step1";
+                git clone $sub/$p.git
+                sudo mv $p $repo_name/
+        else
+                echo "step2";
+                sudo rm -r $p
+                git clone $sub/$p.git
+                sudo mv $p $repo_name/
+        fi
+done<final
+else
+sudo rm -r $repo_name
+mkdir $repo_name
+while read p; do
+        if [ ! -d $p ]
+        then
+                echo "step1";
+                git clone $sub/$p
+                sudo mv $p $repo_name/
+        else
+                echo "step2";
+                sudo rm -r $p
+                git clone $sub/$p
+                sudo mv $p $repo_name/
+fi
+done<final
+fi
+else
+echo "Repository is not available!!! check and try with correct name ";
+fi
